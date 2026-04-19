@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, UserPlus, LogOut, Edit3, Check, Trash2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, UserPlus, LogOut, Edit3, Check, Trash2, Camera } from 'lucide-react';
 import axios from '../utils/axiosConfig';
 import useChatStore from '../store/chatStore';
 import useAuthStore from '../store/authStore';
@@ -7,16 +7,44 @@ import useAuthStore from '../store/authStore';
 const GroupSettingsModal = ({ isOpen, onClose }) => {
   const { user } = useAuthStore();
   const { selectedChat, setSelectedChat, setChats, chats } = useChatStore();
+  const fileInputRef = useRef(null);
   
   const [isEditingName, setIsEditingName] = useState(false);
   const [groupName, setGroupName] = useState(selectedChat?.chatName || '');
   const [memberSearch, setMemberSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [iconPreview, setIconPreview] = useState(selectedChat?.groupIcon);
 
   if (!isOpen || !selectedChat) return null;
 
   const isAdmin = selectedChat.groupAdmin._id === user._id;
+
+  const handleIconChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result;
+      setIconPreview(base64String);
+      
+      try {
+        setLoading(true);
+        const { data } = await axios.put('/api/chats/groupicon', {
+          chatId: selectedChat._id,
+          groupIcon: base64String,
+        });
+        setSelectedChat(data);
+        setChats(chats.map(c => c._id === data._id ? data : c));
+      } catch (error) {
+        alert(error.response?.data?.message || 'Failed to update group icon');
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleRename = async () => {
     if (!groupName || groupName === selectedChat.chatName) {
@@ -116,6 +144,36 @@ const GroupSettingsModal = ({ isOpen, onClose }) => {
         </div>
 
         <div style={{ padding: '2rem', maxHeight: '70vh', overflowY: 'auto' }}>
+          {/* Group Icon Section */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2.5rem' }}>
+            <div style={{ position: 'relative', width: '120px', height: '120px' }}>
+              <img 
+                src={iconPreview || `https://ui-avatars.com/api/?name=${selectedChat.chatName}&background=random`} 
+                alt="Group Icon" 
+                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '4px solid var(--bg-tertiary)', boxShadow: 'var(--shadow-md)' }} 
+              />
+              {isAdmin && (
+                <>
+                  <button 
+                    onClick={() => fileInputRef.current.click()}
+                    style={{ position: 'absolute', bottom: '0', right: '0', background: 'var(--accent-primary)', color: 'white', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-lg)' }}
+                    title="Change Group Icon"
+                  >
+                    <Camera size={20} />
+                  </button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleIconChange} 
+                    accept="image/*" 
+                    style={{ display: 'none' }} 
+                  />
+                </>
+              )}
+            </div>
+            {loading && <div style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', marginTop: '0.5rem' }}>Uploading...</div>}
+          </div>
+
           {/* Group Name Section */}
           <div style={{ marginBottom: '2rem' }}>
             <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '0.75rem' }}>Group Name</label>

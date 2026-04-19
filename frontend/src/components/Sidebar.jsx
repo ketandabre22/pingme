@@ -133,7 +133,7 @@ const Sidebar = () => {
   
   const getSenderAvatar = (chat) => {
     if (!chat) return '';
-    if (chat.isGroupChat) return `https://ui-avatars.com/api/?name=${chat.chatName}&background=random`;
+    if (chat.isGroupChat) return chat.groupIcon || `https://ui-avatars.com/api/?name=${chat.chatName}&background=random`;
     if (!chat.users) return '';
     return chat.users[0]._id === user._id ? chat.users[1].avatar : chat.users[0].avatar;
   };

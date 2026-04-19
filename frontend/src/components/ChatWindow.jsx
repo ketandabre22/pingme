@@ -185,7 +185,12 @@ const ChatWindow = () => {
 
   const getSender = (chat) => {
     if (!chat) return {};
-    if (chat.isGroupChat) return { name: chat.chatName, avatar: `https://ui-avatars.com/api/?name=${chat.chatName}&background=random`, isGroup: true, users: chat.users };
+    if (chat.isGroupChat) return { 
+      name: chat.chatName, 
+      avatar: chat.groupIcon || `https://ui-avatars.com/api/?name=${chat.chatName}&background=random`, 
+      isGroup: true, 
+      users: chat.users 
+    };
     return chat.users[0]._id === user._id ? chat.users[1] : chat.users[0];
   };
 

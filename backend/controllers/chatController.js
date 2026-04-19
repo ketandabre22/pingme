@@ -182,11 +182,37 @@ const removeFromGroup = async (req, res) => {
   }
 };
 
+// @desc    Update Group Icon
+// @route   PUT /api/chats/groupicon
+// @access  Private
+const updateGroupIcon = async (req, res) => {
+  const { chatId, groupIcon } = req.body;
+
+  if (!chatId || !groupIcon) {
+    return res.status(400).json({ message: "Please provide chatId and groupIcon" });
+  }
+
+  const updatedChat = await Chat.findByIdAndUpdate(
+    chatId,
+    { groupIcon: groupIcon },
+    { new: true }
+  )
+    .populate("users", "-password")
+    .populate("groupAdmin", "-password");
+
+  if (!updatedChat) {
+    res.status(404).json({ message: "Chat Not Found" });
+  } else {
+    res.json(updatedChat);
+  }
+};
+
 module.exports = { 
   accessChat, 
   fetchChats, 
   createGroupChat, 
   renameGroup, 
   addToGroup, 
-  removeFromGroup 
+  removeFromGroup,
+  updateGroupIcon
 };
