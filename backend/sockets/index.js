@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Message = require('../models/Message');
 
 const setupSockets = (io) => {
   io.on('connection', (socket) => {
@@ -9,8 +10,6 @@ const setupSockets = (io) => {
       socket.join(userData._id);
       socket.emit('connected');
       console.log('User joined room:', userData._id);
-      
-      // Update online status in DB if needed, though usually handled via REST login
     });
 
     socket.on('join chat', (room) => {
@@ -28,6 +27,35 @@ const setupSockets = (io) => {
         if (user._id === newMessageRecieved.sender._id) return;
         socket.in(user._id).emit('message recieved', newMessageRecieved);
       });
+    });
+
+    socket.on('message delivered', async ({ messageId, userId, chatId }) => {
+      try {
+        const message = await Message.findById(messageId).populate('sender', '_id');
+        if (message && !message.deliveredTo.includes(userId)) {
+          message.deliveredTo.push(userId);
+          await message.save();
+          // Notify sender
+          socket.in(message.sender._id.toString()).emit('status updated', { messageId, userId, status: 'delivered', chatId });
+        }
+      } catch (error) {
+        console.error('Error updating delivered status:', error);
+      }
+    });
+
+    socket.on('message seen', async ({ messageId, userId, chatId }) => {
+      try {
+        const message = await Message.findById(messageId).populate('sender', '_id');
+        if (message && !message.seenBy.includes(userId)) {
+          message.seenBy.push(userId);
+          if (!message.deliveredTo.includes(userId)) message.deliveredTo.push(userId);
+          await message.save();
+          // Notify sender
+          socket.in(message.sender._id.toString()).emit('status updated', { messageId, userId, status: 'seen', chatId });
+        }
+      } catch (error) {
+        console.error('Error updating seen status:', error);
+      }
     });
 
     socket.on('message edited', (updatedMessage) => {
@@ -48,11 +76,6 @@ const setupSockets = (io) => {
       });
     });
 
-    socket.off('setup', () => {
-      console.log('USER DISCONNECTED');
-      socket.leave(userData._id);
-    });
-    
     socket.on('disconnect', () => {
       console.log('Client disconnected', socket.id);
     });

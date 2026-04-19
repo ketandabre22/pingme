@@ -11,6 +11,9 @@ const useChatStore = create((set) => ({
   activeTab: 'account',
   setActiveTab: (tab) => set({ activeTab: tab }),
   
+  socket: null,
+  setSocket: (socket) => set({ socket }),
+  
   setSelectedChat: (chat) => set({ selectedChat: chat, showSettings: false }),
   
   setChats: (chats) => set({ chats }),

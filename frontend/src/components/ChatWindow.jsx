@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import axios from '../utils/axiosConfig';
 import useAuthStore from '../store/authStore';
 import useChatStore from '../store/chatStore';
-import { Send, Check, ArrowLeft, Star, Info, MoreVertical, Edit2, Trash2, X, Lock } from 'lucide-react';
+import { Send, Check, CheckCheck, ArrowLeft, Star, Info, MoreVertical, Edit2, Trash2, X, Lock } from 'lucide-react';
 import GroupSettingsModal from './GroupSettingsModal';
 import { format } from 'date-fns';
 import { encryptMessage, decryptMessage } from '../utils/cryptoUtils';
@@ -13,7 +13,7 @@ var socket, selectedChatCompare;
 
 const ChatWindow = () => {
   const { user, updateSettings } = useAuthStore();
-  const { selectedChat, setSelectedChat, messages, setMessages, addMessage } = useChatStore();
+  const { selectedChat, setSelectedChat, messages, setMessages, addMessage, socket } = useChatStore();
   
   const [newMessage, setNewMessage] = useState('');
   const [socketConnected, setSocketConnected] = useState(false);
@@ -32,16 +32,17 @@ const ChatWindow = () => {
   };
 
   useEffect(() => {
-    socket = io(ENDPOINT);
-    socket.emit('setup', user);
-    socket.on('connected', () => setSocketConnected(true));
-    socket.on('typing', () => setIsTyping(true));
-    socket.on('stop typing', () => setIsTyping(false));
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [user]);
+    if (socket) {
+      setSocketConnected(true);
+      socket.on('typing', () => setIsTyping(true));
+      socket.on('stop typing', () => setIsTyping(false));
+      
+      return () => {
+        socket.off('typing');
+        socket.off('stop typing');
+      };
+    }
+  }, [socket]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -58,8 +59,15 @@ const ChatWindow = () => {
         setLoading(false);
         socket.emit('join chat', selectedChat._id);
         
-        // Mark messages as seen
+        // Mark messages as seen in DB
         await axios.put(`/api/messages/seen/${selectedChat._id}`);
+        
+        // Notify via socket for each unread message
+        decryptedMessages.forEach(msg => {
+          if (msg.sender._id !== user._id && !msg.seenBy.includes(user._id)) {
+            socket.emit('message seen', { messageId: msg._id, userId: user._id, chatId: selectedChat._id });
+          }
+        });
       } catch (error) {
         console.error('Failed to load messages');
         setLoading(false);
@@ -85,7 +93,30 @@ const ChatWindow = () => {
           content: decryptMessage(newMessageRecieved.content, newMessageRecieved.chat._id)
         };
         addMessage(decryptedMsg);
+        
+        // Emit seen event immediately if chat is open
+        socket.emit('message seen', { 
+          messageId: newMessageRecieved._id, 
+          userId: user._id, 
+          chatId: newMessageRecieved.chat._id 
+        });
       }
+    });
+
+    socket.on('status updated', ({ messageId, status, userId }) => {
+      setMessages(prev => prev.map(m => {
+        if (m._id === messageId) {
+          const updatedMsg = { ...m };
+          if (status === 'seen' && !updatedMsg.seenBy.includes(userId)) {
+            updatedMsg.seenBy = [...updatedMsg.seenBy, userId];
+          }
+          if (status === 'delivered' && !updatedMsg.deliveredTo.includes(userId)) {
+            updatedMsg.deliveredTo = [...updatedMsg.deliveredTo, userId];
+          }
+          return updatedMsg;
+        }
+        return m;
+      }));
     });
 
     socket.on('message updated', (updatedMessage) => {
@@ -323,8 +354,19 @@ const ChatWindow = () => {
                     {m.content}
                     {m.isEdited && !m.isDeleted && <span style={{ fontSize: '0.6rem', marginLeft: '0.5rem', opacity: 0.6 }}>(edited)</span>}
                   </div>
-                  <div style={{ fontSize: '0.65rem', textAlign: 'right', marginTop: '0.25rem', color: isMyMessage ? 'rgba(255,255,255,0.7)' : 'var(--text-secondary)' }}>
+                  <div style={{ fontSize: '0.65rem', textAlign: 'right', marginTop: '0.25rem', color: isMyMessage ? 'rgba(255,255,255,0.7)' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
                     {format(new Date(m.createdAt), 'p')}
+                    {isMyMessage && !m.isDeleted && (
+                      <span style={{ display: 'flex', alignItems: 'center' }}>
+                        {m.seenBy?.length > 0 ? (
+                          <CheckCheck size={14} style={{ color: '#34d399' }} /> // Green/Blue for seen
+                        ) : m.deliveredTo?.length > 0 ? (
+                          <CheckCheck size={14} /> // Double grey for delivered
+                        ) : (
+                          <Check size={14} /> // Single grey for sent
+                        )}
+                      </span>
+                    )}
                   </div>
 
                   {isMyMessage && !m.isDeleted && (

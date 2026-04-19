@@ -5,10 +5,32 @@ import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
 import Settings from '../components/Settings';
 import logo from '../assets/logo_pm.svg';
+import io from 'socket.io-client';
+
+const ENDPOINT = import.meta.env.VITE_API_URL || 'http://localhost:5009';
 
 const ChatPage = () => {
   const { user } = useAuthStore();
-  const { selectedChat, showSettings } = useChatStore();
+  const { selectedChat, showSettings, socket, setSocket } = useChatStore();
+
+  useEffect(() => {
+    const newSocket = io(ENDPOINT);
+    newSocket.emit('setup', user);
+    setSocket(newSocket);
+
+    newSocket.on('message recieved', (newMessageRecieved) => {
+      // Emit delivered event immediately
+      newSocket.emit('message delivered', { 
+        messageId: newMessageRecieved._id, 
+        userId: user._id, 
+        chatId: newMessageRecieved.chat._id 
+      });
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [user]);
 
   return (
     <div style={{ display: 'flex', width: '100%', height: '100vh', overflow: 'hidden' }}>
