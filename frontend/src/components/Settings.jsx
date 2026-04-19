@@ -173,7 +173,7 @@ const Settings = () => {
               <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--text-primary)' }}>Appearance</h3>
               <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Choose your favorite theme and customize your experience.</p>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
                 {[
                   { id: 'default', name: 'PingMe Blue', color: '#3b82f6', class: '' },
                   { id: 'emerald', name: 'Emerald Green', color: '#10b981', class: 'theme-emerald' },
@@ -185,7 +185,9 @@ const Settings = () => {
                   <div 
                     key={theme.id}
                     onClick={() => {
-                      document.body.className = theme.class;
+                      // Remove existing theme classes
+                      document.body.classList.remove('theme-emerald', 'theme-ocean', 'theme-sunset', 'theme-midnight', 'theme-royal');
+                      if (theme.class) document.body.classList.add(theme.class);
                       localStorage.setItem('pingme-theme', theme.class);
                       setMessage({ type: 'success', text: `Theme changed to ${theme.name}` });
                     }}
@@ -194,7 +196,7 @@ const Settings = () => {
                       borderRadius: '16px', 
                       padding: '1rem', 
                       cursor: 'pointer',
-                      border: document.body.className === theme.class ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                      border: document.body.classList.contains(theme.class) || (theme.id === 'default' && document.body.className === '') ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
                       textAlign: 'center',
                       transition: 'var(--transition)'
                     }}
@@ -203,6 +205,45 @@ const Settings = () => {
                   >
                     <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: theme.color, margin: '0 auto 1rem', boxShadow: `0 4px 12px ${theme.color}44` }} />
                     <div style={{ fontWeight: '500', fontSize: '0.9rem' }}>{theme.name}</div>
+                  </div>
+                ))}
+              </div>
+
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Chat Background</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1.5rem' }}>
+                {[
+                  { id: 'solid', name: 'Solid Default', bg: '#0f172a', class: '' },
+                  { id: 'mesh', name: 'Deep Mesh', bg: 'linear-gradient(to bottom right, #0f172a, #334155)', class: 'bg-mesh' },
+                  { id: 'aurora', name: 'Aurora Night', bg: 'linear-gradient(to bottom right, #1e1b4b, #312e81)', class: 'bg-aurora' },
+                  { id: 'emerald-glow', name: 'Emerald Glow', bg: 'radial-gradient(circle at top right, rgba(16, 185, 129, 0.2), #0f172a)', class: 'bg-emerald-glow' },
+                  { id: 'sunset-glow', name: 'Sunset Glow', bg: 'radial-gradient(circle at top left, rgba(244, 63, 94, 0.2), #0f172a)', class: 'bg-sunset-glow' },
+                  { id: 'deep-sea', name: 'Deep Sea', bg: 'linear-gradient(135deg, #0f172a 0%, #0c4a6e 100%)', class: 'bg-deep-sea' }
+                ].map((bg) => (
+                  <div 
+                    key={bg.id}
+                    onClick={() => {
+                      document.body.classList.remove('bg-mesh', 'bg-aurora', 'bg-emerald-glow', 'bg-sunset-glow', 'bg-deep-sea');
+                      if (bg.class) document.body.classList.add(bg.class);
+                      localStorage.setItem('pingme-bg', bg.class);
+                      setMessage({ type: 'success', text: `Background changed to ${bg.name}` });
+                    }}
+                    style={{ 
+                      height: '100px',
+                      background: bg.bg, 
+                      borderRadius: '12px', 
+                      cursor: 'pointer',
+                      border: document.body.classList.contains(bg.class) || (bg.id === 'solid' && !document.body.className.includes('bg-')) ? '3px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'var(--transition)',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  >
+                    <div style={{ background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600', color: 'white', zIndex: 1 }}>{bg.name}</div>
                   </div>
                 ))}
               </div>

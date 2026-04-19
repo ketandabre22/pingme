@@ -3,11 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
-// Apply saved theme on load
+// Apply saved theme and background on load
 const savedTheme = localStorage.getItem('pingme-theme');
-if (savedTheme) {
-  document.body.className = savedTheme;
-}
+if (savedTheme) document.body.classList.add(savedTheme);
+
+const savedBg = localStorage.getItem('pingme-bg');
+if (savedBg) document.body.classList.add(savedBg);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
