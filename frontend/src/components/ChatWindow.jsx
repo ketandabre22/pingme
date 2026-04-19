@@ -275,11 +275,14 @@ const ChatWindow = () => {
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'transparent' }}>
       {/* Header */}
       <div style={{ height: 'var(--header-height)', padding: '0 1.5rem', background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: sender.isGroup ? 'pointer' : 'default' }}
+          onClick={() => sender.isGroup && setShowGroupSettings(true)}
+        >
           <button 
             className="md:hidden" 
             style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-            onClick={() => setSelectedChat(null)}
+            onClick={(e) => { e.stopPropagation(); setSelectedChat(null); }}
           >
             <ArrowLeft size={24} />
           </button>
@@ -313,17 +316,6 @@ const ChatWindow = () => {
               title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
             >
               <Star size={24} fill={isFavorite ? 'var(--warning)' : 'none'} color={isFavorite ? 'var(--warning)' : 'var(--text-secondary)'} />
-            </button>
-          )}
-          {sender.isGroup && (
-            <button 
-              onClick={() => setShowGroupSettings(true)}
-              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'var(--transition)' }}
-              title="Group Settings"
-              onMouseOver={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
-              onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-            >
-              <Info size={24} />
             </button>
           )}
         </div>
