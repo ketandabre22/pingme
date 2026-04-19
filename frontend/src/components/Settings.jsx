@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Settings as SettingsIcon, User, Star, Shield, Bell, HelpCircle, X, Check, ArrowLeft } from 'lucide-react';
+import { Settings as SettingsIcon, User, Star, Shield, Bell, HelpCircle, X, Check, ArrowLeft, Camera, Edit2 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import useChatStore from '../store/chatStore';
 import axios from '../utils/axiosConfig';
@@ -155,10 +155,38 @@ const Settings = () => {
         {/* Settings Content Area */}
         <div style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
           {activeTab === 'account' && (
-            <div className="animate-fade-in">
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--text-primary)' }}>Account Information</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
-                <img src={avatarPreview} alt="Profile" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} />
+            <div className="animate-fade-in" style={{ maxWidth: '600px', margin: '0 auto' }}>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '2.5rem', color: 'var(--text-primary)', fontWeight: '700' }}>Edit Profile</h3>
+              
+              {/* Profile Picture Section */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '3rem' }}>
+                <div 
+                  style={{ position: 'relative', width: '120px', height: '120px', cursor: 'pointer', group: 'true' }}
+                  onClick={() => fileInputRef.current.click()}
+                  onMouseOver={(e) => e.currentTarget.querySelector('.overlay').style.opacity = '1'}
+                  onMouseOut={(e) => e.currentTarget.querySelector('.overlay').style.opacity = '0'}
+                >
+                  <img 
+                    src={avatarPreview} 
+                    alt="Profile" 
+                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '4px solid var(--bg-tertiary)', boxShadow: 'var(--shadow-lg)' }} 
+                  />
+                  <div 
+                    className="overlay"
+                    style={{ 
+                      position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', 
+                      borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', 
+                      flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+                      color: 'white', opacity: 0, transition: 'var(--transition)', gap: '4px'
+                    }}
+                  >
+                    <Camera size={24} fill="white" />
+                    <span style={{ fontSize: '0.7rem', fontWeight: '600', textTransform: 'uppercase' }}>Change</span>
+                  </div>
+                  <div style={{ position: 'absolute', bottom: '5px', right: '5px', background: 'var(--accent-primary)', color: 'white', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid var(--bg-secondary)', boxShadow: 'var(--shadow-md)' }}>
+                    <Camera size={14} fill="white" />
+                  </div>
+                </div>
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -166,44 +194,81 @@ const Settings = () => {
                   style={{ display: 'none' }} 
                   onChange={handleAvatarChange}
                 />
-                <button 
-                  className="btn" 
-                  onClick={() => fileInputRef.current.click()}
-                  style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
-                >
-                  Upload Photo
-                </button>
+                <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Click to update profile photo</p>
               </div>
               
               {message.text && (
                 <div style={{ 
-                  padding: '0.75rem 1rem', 
-                  borderRadius: '8px', 
-                  marginBottom: '1.5rem',
-                  background: message.type === 'success' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                  padding: '1rem', 
+                  borderRadius: '12px', 
+                  marginBottom: '2rem',
+                  background: message.type === 'success' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                   color: message.type === 'success' ? '#4ade80' : '#f87171',
-                  border: `1px solid ${message.type === 'success' ? '#22c55e' : '#ef4444'}`,
-                  fontSize: '0.9rem'
+                  border: `1px solid ${message.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem'
                 }}>
+                  {message.type === 'success' ? <Check size={18} /> : <X size={18} />}
                   {message.text}
                 </div>
               )}
 
-              <div className="input-group">
-                <label>Name</label>
-                <input type="text" className="input-field" value={name} onChange={(e) => setName(e.target.value)} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div className="input-group">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <label style={{ margin: 0, color: 'var(--accent-primary)', fontSize: '0.8rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name</label>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="text" 
+                      className="input-field" 
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)} 
+                      style={{ paddingRight: '2.5rem', fontSize: '1rem' }}
+                    />
+                    <Edit2 size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.5 }} />
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <label style={{ margin: 0, color: 'var(--accent-primary)', fontSize: '0.8rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>About</label>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="text" 
+                      className="input-field" 
+                      value={about} 
+                      onChange={(e) => setAbout(e.target.value)} 
+                      placeholder="Hey there! I am using PingMe." 
+                      style={{ paddingRight: '2.5rem', fontSize: '1rem' }}
+                    />
+                    <Edit2 size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.5 }} />
+                  </div>
+                </div>
+
+                <div className="input-group" style={{ opacity: 0.7 }}>
+                  <label style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: '600', textTransform: 'uppercase' }}>Email Address (Primary)</label>
+                  <input type="email" className="input-field" value={email} disabled style={{ cursor: 'not-allowed', background: 'var(--bg-tertiary)' }} />
+                </div>
+
+                <button 
+                  className="btn btn-primary" 
+                  onClick={handleSaveAccount} 
+                  disabled={loading}
+                  style={{ 
+                    marginTop: '1rem', 
+                    padding: '1rem', 
+                    fontSize: '1rem', 
+                    fontWeight: '600',
+                    boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3)'
+                  }}
+                >
+                  {loading ? 'Saving Changes...' : 'Save Changes'}
+                </button>
               </div>
-              <div className="input-group">
-                <label>Email</label>
-                <input type="email" className="input-field" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="input-group">
-                <label>About</label>
-                <input type="text" className="input-field" value={about} onChange={(e) => setAbout(e.target.value)} placeholder="Hey there! I am using PingMe." />
-              </div>
-              <button className="btn btn-primary" onClick={handleSaveAccount} disabled={loading}>
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
             </div>
           )}
 
