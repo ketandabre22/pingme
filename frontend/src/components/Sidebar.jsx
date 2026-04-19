@@ -4,6 +4,7 @@ import axios from '../utils/axiosConfig';
 import useAuthStore from '../store/authStore';
 import useChatStore from '../store/chatStore';
 import Settings from './Settings';
+import { decryptMessage } from '../utils/cryptoUtils';
 
 const Sidebar = () => {
   const { user, logout } = useAuthStore();
@@ -283,7 +284,7 @@ const Sidebar = () => {
                         )}
                       </div>
                       <div style={{ fontSize: '0.85rem', color: unreadCounts[chat._id] > 0 ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: unreadCounts[chat._id] > 0 ? '600' : '400', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '4px' }}>
-                        {chat.latestMessage ? chat.latestMessage.content : 'Start a conversation'}
+                        {chat.latestMessage ? decryptMessage(chat.latestMessage.content, chat._id) : 'Start a conversation'}
                       </div>
                     </div>
                   </div>
