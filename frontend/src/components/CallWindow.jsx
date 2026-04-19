@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import Peer from 'simple-peer';
+import SimplePeer from 'simple-peer';
+const Peer = SimplePeer.default || SimplePeer;
 import { Phone, PhoneOff, Video, VideoOff, Mic, MicOff, Maximize, Minimize, X } from 'lucide-react';
 import useChatStore from '../store/chatStore';
 import useAuthStore from '../store/authStore';
@@ -29,14 +30,20 @@ const CallWindow = () => {
   useEffect(() => {
     // Only run if there's a call in progress or incoming
     if (call.isReceivingCall || calling) {
+      console.log("Requesting media permissions...");
       navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         .then((currentStream) => {
+          console.log("Media stream obtained");
           setStream(currentStream);
           if (myVideo.current) {
             myVideo.current.srcObject = currentStream;
           }
         })
-        .catch(err => console.error("Media error:", err));
+        .catch(err => {
+          console.error("Media error:", err);
+          alert("Could not access camera/microphone. Please check permissions.");
+          leaveCall();
+        });
     }
 
     return () => {
@@ -49,15 +56,23 @@ const CallWindow = () => {
   useEffect(() => {
     // If we are initiating a call (not receiving one)
     if (call.from && !call.isReceivingCall && !callAccepted && !calling) {
-      callUser(call.from, call.name, call.avatar, call.type);
+      setCalling(true);
     }
   }, [call]);
+
+  useEffect(() => {
+    // If we are calling and stream is ready, THEN call user
+    if (calling && stream && !connectionRef.current && !callAccepted) {
+      callUser(call.from, call.name, call.avatar, call.type);
+    }
+  }, [calling, stream]);
 
   // Handle incoming call listeners
   useEffect(() => {
     if (!socket) return;
 
     socket.on('call-accepted', (signal) => {
+      console.log("Call accepted, signaling...");
       setCallAccepted(true);
       if (connectionRef.current) {
         connectionRef.current.signal(signal);
@@ -65,6 +80,7 @@ const CallWindow = () => {
     });
 
     socket.on('call-ended', () => {
+      console.log("Call ended by remote");
       leaveCall();
     });
 
@@ -75,6 +91,7 @@ const CallWindow = () => {
   }, [socket]);
 
   const answerCall = () => {
+    console.log("Answering call...");
     setCallAccepted(true);
     setCalling(false);
 
@@ -85,21 +102,25 @@ const CallWindow = () => {
     });
 
     peer.on('signal', (data) => {
+      console.log("Peer signaling (answer)");
       socket.emit('answer-call', { signal: data, to: call.from });
     });
 
     peer.on('stream', (currentStream) => {
+      console.log("Received remote stream");
       if (userVideo.current) {
         userVideo.current.srcObject = currentStream;
       }
     });
+
+    peer.on('error', (err) => console.error("Peer error:", err));
 
     peer.signal(call.signal);
     connectionRef.current = peer;
   };
 
   const callUser = (id, name, avatar, type = 'video') => {
-    setCalling(true);
+    console.log("Initiating call to:", id);
     
     const peer = new Peer({
       initiator: true,
@@ -108,6 +129,7 @@ const CallWindow = () => {
     });
 
     peer.on('signal', (data) => {
+      console.log("Peer signaling (offer)");
       socket.emit('call-user', {
         userToCall: id,
         signalData: data,
@@ -119,10 +141,13 @@ const CallWindow = () => {
     });
 
     peer.on('stream', (currentStream) => {
+      console.log("Received remote stream (initiator)");
       if (userVideo.current) {
         userVideo.current.srcObject = currentStream;
       }
     });
+
+    peer.on('error', (err) => console.error("Peer error:", err));
 
     connectionRef.current = peer;
   };
