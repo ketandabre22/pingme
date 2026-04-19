@@ -366,12 +366,15 @@ const Sidebar = () => {
         padding: '0.5rem 0'
       }}>
         <button 
-          onClick={() => setActiveNav('chats')}
+          onClick={() => {
+            setActiveNav('chats');
+            setShowSettings(false);
+          }}
           style={{ 
             background: 'none', 
             border: 'none', 
             cursor: 'pointer', 
-            color: activeNav === 'chats' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            color: (!showSettings && activeNav === 'chats') ? 'var(--accent-primary)' : 'var(--text-secondary)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
