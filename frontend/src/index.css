@@ -201,6 +201,15 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Message Options */
+[style*="maxWidth: '75%'"]:hover .msg-chevron {
+  opacity: 1 !important;
+}
+
+.menu-item-hover:hover {
+  background: var(--bg-tertiary);
+}
+
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }

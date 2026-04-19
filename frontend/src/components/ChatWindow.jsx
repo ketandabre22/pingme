@@ -327,10 +327,53 @@ const ChatWindow = () => {
                     {format(new Date(m.createdAt), 'p')}
                   </div>
 
+                  {isMyMessage && !m.isDeleted && (
+                    <div 
+                      onClick={() => setShowMsgOptions(showMsgOptions === m._id ? null : m._id)}
+                      style={{ 
+                        position: 'absolute', 
+                        right: '8px', 
+                        top: '4px', 
+                        cursor: 'pointer',
+                        opacity: showMsgOptions === m._id ? 1 : 0,
+                        transition: 'opacity 0.2s',
+                        zIndex: 2
+                      }}
+                      className="msg-chevron"
+                    >
+                      <MoreVertical size={14} style={{ color: isMyMessage ? 'rgba(255,255,255,0.8)' : 'var(--text-secondary)' }} />
+                    </div>
+                  )}
+
                   {isMyMessage && !m.isDeleted && showMsgOptions === m._id && (
-                    <div style={{ position: 'absolute', top: '-10px', left: '-30px', background: 'var(--bg-secondary)', borderRadius: '8px', boxShadow: 'var(--shadow-md)', display: 'flex', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
-                      <button onClick={() => { setEditingMessage(m); setEditContent(m.content); }} style={{ padding: '0.4rem', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }} title="Edit"><Edit2 size={14}/></button>
-                      <button onClick={() => handleDeleteMessage(m._id)} style={{ padding: '0.4rem', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }} title="Delete"><Trash2 size={14}/></button>
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '25px', 
+                      right: '0', 
+                      background: 'var(--bg-secondary)', 
+                      borderRadius: '8px', 
+                      boxShadow: 'var(--shadow-lg)', 
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      overflow: 'hidden', 
+                      border: '1px solid var(--border-color)',
+                      zIndex: 10,
+                      minWidth: '100px'
+                    }}>
+                      <button 
+                        onClick={() => { setEditingMessage(m); setEditContent(m.content); setShowMsgOptions(null); }} 
+                        style={{ padding: '0.6rem 1rem', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }} 
+                        className="menu-item-hover"
+                      >
+                        <Edit2 size={12}/> Edit
+                      </button>
+                      <button 
+                        onClick={() => { handleDeleteMessage(m._id); setShowMsgOptions(null); }} 
+                        style={{ padding: '0.6rem 1rem', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }} 
+                        className="menu-item-hover"
+                      >
+                        <Trash2 size={12}/> Delete
+                      </button>
                     </div>
                   )}
                 </div>
