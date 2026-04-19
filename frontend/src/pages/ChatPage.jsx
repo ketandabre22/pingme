@@ -6,6 +6,7 @@ import ChatWindow from '../components/ChatWindow';
 import Settings from '../components/Settings';
 import logo from '../assets/logo_pm.svg';
 import io from 'socket.io-client';
+import CreateGroupModal from '../components/CreateGroupModal';
 
 const ENDPOINT = import.meta.env.VITE_API_URL || 'http://localhost:5009';
 
@@ -55,6 +56,7 @@ const ChatPage = () => {
           </div>
         )}
       </div>
+      <CreateGroupModal />
     </div>
   );
 };
