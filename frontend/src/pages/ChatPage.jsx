@@ -6,6 +6,7 @@ import ChatWindow from '../components/ChatWindow';
 import Settings from '../components/Settings';
 import CreateGroupModal from '../components/CreateGroupModal';
 import GroupSettingsModal from '../components/GroupSettingsModal';
+import CallWindow from '../components/CallWindow';
 import logo from '../assets/logo_pm.svg';
 import io from 'socket.io-client';
 
@@ -13,7 +14,15 @@ const ENDPOINT = import.meta.env.VITE_API_URL || 'http://localhost:5009';
 
 const ChatPage = () => {
   const { user } = useAuthStore();
-  const { selectedChat, showSettings, socket, setSocket, showGroupSettings, setShowGroupSettings } = useChatStore();
+  const { 
+    selectedChat, 
+    showSettings, 
+    socket, 
+    setSocket, 
+    showGroupSettings, 
+    setShowGroupSettings,
+    setCall
+  } = useChatStore();
 
   useEffect(() => {
     const newSocket = io(ENDPOINT);
@@ -27,6 +36,10 @@ const ChatPage = () => {
         userId: user._id, 
         chatId: newMessageRecieved.chat._id 
       });
+    });
+
+    newSocket.on('incoming-call', ({ signal, from, name, avatar, type }) => {
+      setCall({ isReceivingCall: true, from, name, avatar, signal, type });
     });
 
     return () => {
@@ -62,6 +75,7 @@ const ChatPage = () => {
         isOpen={showGroupSettings} 
         onClose={() => setShowGroupSettings(false)} 
       />
+      <CallWindow />
     </div>
   );
 };

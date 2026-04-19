@@ -19,6 +19,16 @@ const useChatStore = create((set) => ({
   
   showGroupSettings: false,
   setShowGroupSettings: (val) => set({ showGroupSettings: val }),
+
+  // Call states
+  call: { isReceivingCall: false, from: null, name: null, avatar: null, signal: null, type: 'video' },
+  callAccepted: false,
+  callEnded: false,
+  stream: null,
+  setCall: (call) => set({ call }),
+  setCallAccepted: (val) => set({ callAccepted: val }),
+  setCallEnded: (val) => set({ callEnded: val }),
+  setStream: (stream) => set({ stream }),
   
   setSelectedChat: (chat) => set({ selectedChat: chat, showSettings: false }),
   

@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import axios from '../utils/axiosConfig';
 import useAuthStore from '../store/authStore';
 import useChatStore from '../store/chatStore';
-import { Send, Check, CheckCheck, ArrowLeft, Star, Info, MoreVertical, Edit2, Trash2, X, Lock } from 'lucide-react';
+import { Send, Check, CheckCheck, ArrowLeft, Star, Info, MoreVertical, Edit2, Trash2, X, Lock, Video, Phone } from 'lucide-react';
 import GroupSettingsModal from './GroupSettingsModal';
 import { format } from 'date-fns';
 import { encryptMessage, decryptMessage } from '../utils/cryptoUtils';
@@ -20,7 +20,8 @@ const ChatWindow = () => {
     setMessages, 
     addMessage, 
     socket,
-    setShowGroupSettings
+    setShowGroupSettings,
+    setCall
   } = useChatStore();
   
   const [newMessage, setNewMessage] = useState('');
@@ -308,15 +309,35 @@ const ChatWindow = () => {
             )}
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
           {!sender.isGroup && (
-            <button 
-              onClick={toggleFavorite}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', transition: 'var(--transition)' }}
-              title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-            >
-              <Star size={24} fill={isFavorite ? 'var(--warning)' : 'none'} color={isFavorite ? 'var(--warning)' : 'var(--text-secondary)'} />
-            </button>
+            <>
+              <button 
+                onClick={() => setCall({ isReceivingCall: false, from: sender._id, name: sender.name, avatar: sender.avatar, signal: null, type: 'voice' })}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'var(--transition)' }}
+                title="Voice Call"
+                onMouseOver={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              >
+                <Phone size={22} />
+              </button>
+              <button 
+                onClick={() => setCall({ isReceivingCall: false, from: sender._id, name: sender.name, avatar: sender.avatar, signal: null, type: 'video' })}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'var(--transition)' }}
+                title="Video Call"
+                onMouseOver={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              >
+                <Video size={22} />
+              </button>
+              <button 
+                onClick={toggleFavorite}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', transition: 'var(--transition)' }}
+                title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+              >
+                <Star size={24} fill={isFavorite ? 'var(--warning)' : 'none'} color={isFavorite ? 'var(--warning)' : 'var(--text-secondary)'} />
+              </button>
+            </>
           )}
         </div>
       </div>

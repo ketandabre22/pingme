@@ -93,6 +93,19 @@ const setupSockets = (io) => {
       });
     });
 
+    // Calling feature events
+    socket.on('call-user', ({ userToCall, signalData, from, name, avatar, type }) => {
+      socket.to(userToCall).emit('incoming-call', { signal: signalData, from, name, avatar, type });
+    });
+
+    socket.on('answer-call', (data) => {
+      socket.to(data.to).emit('call-accepted', data.signal);
+    });
+
+    socket.on('end-call', ({ to }) => {
+      socket.to(to).emit('call-ended');
+    });
+
     socket.on('disconnect', () => {
       console.log('Client disconnected', socket.id);
     });
