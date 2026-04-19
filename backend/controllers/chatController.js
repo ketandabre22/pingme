@@ -88,13 +88,18 @@ const createGroupChat = async (req, res) => {
     return res.status(400).send({ message: 'Invalid users format' });
   }
 
-  if (users.length < 2) {
+  // Ensure unique users and filter out the creator's ID if it's already there
+  const creatorId = req.user._id.toString();
+  users = [...new Set(users.filter(id => id !== creatorId))];
+
+  if (users.length < 1) {
     return res
       .status(400)
-      .send('More than 2 users are required to form a group chat');
+      .json({ message: 'At least one other user is required to form a group chat' });
   }
 
-  users.push(req.user._id); // Use ID specifically
+  // Add the creator to the group
+  users.push(req.user._id);
 
   try {
     const groupChat = await Chat.create({

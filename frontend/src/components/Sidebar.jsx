@@ -102,8 +102,8 @@ const Sidebar = () => {
   };
 
   const handleCreateGroup = async () => {
-    if (!groupName || selectedUsers.length < 2) {
-      alert("Please enter a group name and select at least 2 members.");
+    if (!groupName || selectedUsers.length < 1) {
+      alert("Please enter a group name and select at least 1 other member.");
       return;
     }
     try {
@@ -346,7 +346,7 @@ const Sidebar = () => {
             <button 
               className="btn btn-primary" 
               style={{ width: '100%' }}
-              disabled={!groupName || selectedUsers.length < 2}
+              disabled={!groupName || selectedUsers.length < 1}
               onClick={handleCreateGroup}
             >
               Create Group
