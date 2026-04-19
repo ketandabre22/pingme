@@ -256,9 +256,6 @@ const Sidebar = () => {
         </>
       )}
 
-        </>
-      )}
-
       {/* Bottom Bar */}
       <div style={{ 
         height: 'var(--bottom-bar-height)', 
