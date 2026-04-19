@@ -218,8 +218,74 @@ const Sidebar = () => {
             </button>
           </div>
 
-          {/* Group Modal */}
-          {/* ... */}
+          {/* Chat List */}
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {search ? (
+              <div>
+                <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Search Results</div>
+                {loading ? (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Searching...</div>
+                ) : searchResults.length > 0 ? (
+                  searchResults.map((searchUser) => (
+                    <div 
+                      key={searchUser._id} 
+                      onClick={() => accessChat(searchUser._id)}
+                      style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'var(--transition)', borderBottom: '1px solid var(--border-color)' }}
+                      className="chat-item-hover"
+                      onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+                      onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <img src={searchUser.avatar} alt={searchUser.name} style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div>
+                        <div style={{ fontWeight: '500' }}>{searchUser.name}</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{searchUser.email}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No users found.</div>
+                )}
+              </div>
+            ) : (
+              <div>
+                {chats.map((chat) => (
+                  <div 
+                    key={chat._id} 
+                    onClick={() => setSelectedChat(chat)}
+                    style={{ 
+                      padding: '1rem', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '1rem', 
+                      cursor: 'pointer', 
+                      background: selectedChat?._id === chat._id ? 'var(--bg-tertiary)' : 'transparent',
+                      borderBottom: '1px solid var(--border-color)',
+                      transition: 'var(--transition)'
+                    }}
+                    onMouseOver={(e) => { if(selectedChat?._id !== chat._id) e.currentTarget.style.background = 'rgba(51, 65, 85, 0.5)' }}
+                    onMouseOut={(e) => { if(selectedChat?._id !== chat._id) e.currentTarget.style.background = 'transparent' }}
+                  >
+                    <img src={getSenderAvatar(chat)} alt="avatar" style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
+                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <div style={{ fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {getSenderName(chat)}
+                        </div>
+                        {unreadCounts[chat._id] > 0 && (
+                          <div style={{ background: 'var(--accent-primary)', color: 'white', minWidth: '18px', height: '18px', borderRadius: '9px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', fontWeight: 'bold' }}>
+                            {unreadCounts[chat._id]}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: unreadCounts[chat._id] > 0 ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: unreadCounts[chat._id] > 0 ? '600' : '400', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '4px' }}>
+                        {chat.latestMessage ? chat.latestMessage.content : 'Start a conversation'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       )}
 
@@ -259,9 +325,9 @@ const Sidebar = () => {
                         setGroupSearch('');
                         setGroupSearchResults([]);
                       }}
-                      style={{ padding: '0.5rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      style={{ padding: '0.5rem 1rem', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                     >
-                      <img src={u.avatar} style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
+                      <img src={u.avatar} alt={u.name} style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
                       <span>{u.name}</span>
                     </div>
                   ))}
@@ -289,74 +355,6 @@ const Sidebar = () => {
         </div>
       )}
 
-      {/* Chat List */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        {search ? (
-          <div>
-            <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Search Results</div>
-            {loading ? (
-              <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Searching...</div>
-            ) : searchResults.length > 0 ? (
-              searchResults.map((searchUser) => (
-                <div 
-                  key={searchUser._id} 
-                  onClick={() => accessChat(searchUser._id)}
-                  style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'var(--transition)', borderBottom: '1px solid var(--border-color)' }}
-                  className="chat-item-hover"
-                  onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
-                  onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                >
-                  <img src={searchUser.avatar} alt={searchUser.name} style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
-                  <div>
-                    <div style={{ fontWeight: '500' }}>{searchUser.name}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{searchUser.email}</div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No users found.</div>
-            )}
-          </div>
-        ) : (
-          <div>
-            {chats.map((chat) => (
-              <div 
-                key={chat._id} 
-                onClick={() => setSelectedChat(chat)}
-                style={{ 
-                  padding: '1rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '1rem', 
-                  cursor: 'pointer', 
-                  background: selectedChat?._id === chat._id ? 'var(--bg-tertiary)' : 'transparent',
-                  borderBottom: '1px solid var(--border-color)',
-                  transition: 'var(--transition)'
-                }}
-                onMouseOver={(e) => { if(selectedChat?._id !== chat._id) e.currentTarget.style.background = 'rgba(51, 65, 85, 0.5)' }}
-                onMouseOut={(e) => { if(selectedChat?._id !== chat._id) e.currentTarget.style.background = 'transparent' }}
-              >
-                <img src={getSenderAvatar(chat)} alt="avatar" style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
-                <div style={{ flex: 1, overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <div style={{ fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {getSenderName(chat)}
-                    </div>
-                    {unreadCounts[chat._id] > 0 && (
-                      <div style={{ background: 'var(--accent-primary)', color: 'white', minWidth: '18px', height: '18px', borderRadius: '9px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', fontWeight: 'bold' }}>
-                        {unreadCounts[chat._id]}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: unreadCounts[chat._id] > 0 ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: unreadCounts[chat._id] > 0 ? '600' : '400', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '4px' }}>
-                    {chat.latestMessage ? chat.latestMessage.content : 'Start a conversation'}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
       {/* Bottom Bar */}
       <div style={{ 
         height: 'var(--bottom-bar-height)', 
