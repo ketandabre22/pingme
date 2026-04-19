@@ -3,7 +3,8 @@ import io from 'socket.io-client';
 import axios from '../utils/axiosConfig';
 import useAuthStore from '../store/authStore';
 import useChatStore from '../store/chatStore';
-import { Send, Check, ArrowLeft, Star, MoreVertical, Edit2, Trash2, X } from 'lucide-react';
+import { Send, Check, ArrowLeft, Star, Info, MoreVertical, Edit2, Trash2, X } from 'lucide-react';
+import GroupSettingsModal from './GroupSettingsModal';
 import { format } from 'date-fns';
 
 const ENDPOINT = import.meta.env.VITE_API_URL || 'http://localhost:5009';
@@ -21,6 +22,7 @@ const ChatWindow = () => {
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
   const [showMsgOptions, setShowMsgOptions] = useState(null);
+  const [showGroupSettings, setShowGroupSettings] = useState(false);
   
   const messagesEndRef = useRef(null);
 
@@ -227,15 +229,33 @@ const ChatWindow = () => {
             )}
           </div>
         </div>
-        {!sender.isGroup && (
-          <button 
-            onClick={toggleFavorite}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', transition: 'var(--transition)' }}
-            title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-          >
-            <Star size={24} fill={isFavorite ? 'var(--warning)' : 'none'} color={isFavorite ? 'var(--warning)' : 'var(--text-secondary)'} />
-          </button>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {!sender.isGroup && (
+            <button 
+              onClick={toggleFavorite}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', transition: 'var(--transition)' }}
+              title={isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+            >
+              <Star size={24} fill={isFavorite ? 'var(--warning)' : 'none'} color={isFavorite ? 'var(--warning)' : 'var(--text-secondary)'} />
+            </button>
+          )}
+          {sender.isGroup && (
+            <button 
+              onClick={() => setShowGroupSettings(true)}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'var(--transition)' }}
+              title="Group Settings"
+              onMouseOver={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
+              onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              <Info size={24} />
+            </button>
+          )}
+        </div>
+
+        <GroupSettingsModal 
+          isOpen={showGroupSettings} 
+          onClose={() => setShowGroupSettings(false)} 
+        />
       </div>
 
       {/* Messages */}
