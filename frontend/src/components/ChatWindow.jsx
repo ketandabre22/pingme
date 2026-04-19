@@ -209,9 +209,9 @@ const ChatWindow = () => {
   };
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--chat-bg)' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'transparent' }}>
       {/* Header */}
-      <div style={{ height: 'var(--header-height)', padding: '0 1.5rem', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ height: 'var(--header-height)', padding: '0 1.5rem', background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button 
             className="md:hidden" 

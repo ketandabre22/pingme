@@ -143,9 +143,9 @@ const Sidebar = () => {
   };
 
   return (
-    <div style={{ width: 'var(--sidebar-width)', height: '100vh', background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ width: 'var(--sidebar-width)', height: '100vh', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(10px)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ height: 'var(--header-height)', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
+      <div style={{ height: 'var(--header-height)', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', background: 'rgba(15, 23, 42, 0.4)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {showSettings && (
             <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>

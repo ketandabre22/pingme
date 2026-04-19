@@ -106,9 +106,9 @@ const Settings = () => {
   ];
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', height: '100%' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'transparent', height: '100%' }}>
       {/* Detail Header */}
-      <div style={{ height: 'var(--header-height)', padding: '0 1.5rem', display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+      <div style={{ height: 'var(--header-height)', padding: '0 1.5rem', display: 'flex', alignItems: 'center', background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--border-color)' }}>
         <h3 style={{ fontSize: '1.2rem', fontWeight: '600', textTransform: 'capitalize' }}>{activeTab} Settings</h3>
       </div>
 
