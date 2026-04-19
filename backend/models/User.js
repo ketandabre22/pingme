@@ -40,10 +40,18 @@ const userSchema = new mongoose.Schema(
     ],
     preferences: {
       notifications: { type: Boolean, default: true },
-      showLastSeen: { type: Boolean, default: true },
+      lastSeen: { type: String, enum: ['everyone', 'contacts', 'nobody'], default: 'everyone' },
+      profilePhoto: { type: String, enum: ['everyone', 'contacts', 'nobody'], default: 'everyone' },
+      about: { type: String, enum: ['everyone', 'contacts', 'nobody'], default: 'everyone' },
       readReceipts: { type: Boolean, default: true },
       theme: { type: String, default: 'dark' }
-    }
+    },
+    blockedContacts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      }
+    ]
   },
   { timestamps: true }
 );

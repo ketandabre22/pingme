@@ -23,10 +23,49 @@ const Settings = () => {
   // Preferences states
   const [preferences, setPreferences] = useState(user.preferences || {
     notifications: true,
-    showLastSeen: true,
+    lastSeen: 'everyone',
+    profilePhoto: 'everyone',
+    about: 'everyone',
     readReceipts: true,
     theme: 'dark'
   });
+
+  const handlePrivacyChange = async (key, value) => {
+    const updatedPreferences = { ...preferences, [key]: value };
+    setPreferences(updatedPreferences);
+    try {
+      const { data } = await axios.put('/api/users/settings', { preferences: updatedPreferences });
+      updateSettings(data);
+    } catch (error) {
+      console.error('Failed to update privacy setting');
+    }
+  };
+
+  const PrivacyOption = ({ label, description, value, onSelect }) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', background: 'var(--bg-primary)', borderRadius: '12px', marginBottom: '1rem' }}>
+      <div style={{ flex: 1 }}>
+        <h4 style={{ fontWeight: '500', marginBottom: '0.25rem' }}>{label}</h4>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginRight: '1rem' }}>{description}</p>
+      </div>
+      <select 
+        value={value} 
+        onChange={(e) => onSelect(e.target.value)}
+        style={{ 
+          background: 'var(--bg-tertiary)', 
+          color: 'var(--text-primary)', 
+          border: '1px solid var(--border-color)', 
+          borderRadius: '8px', 
+          padding: '0.5rem 1rem',
+          outline: 'none',
+          cursor: 'pointer'
+        }}
+      >
+        <option value="everyone">Everyone</option>
+        <option value="contacts">My Contacts</option>
+        <option value="nobody">Nobody</option>
+      </select>
+    </div>
+  );
 
   const handleSaveAccount = async () => {
     setLoading(true);
@@ -278,27 +317,46 @@ const Settings = () => {
           )}
 
           {activeTab === 'privacy' && (
-            <div className="animate-fade-in">
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--text-primary)' }}>Privacy Settings</h3>
+            <div className="animate-fade-in" style={{ paddingBottom: '2rem' }}>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Privacy Settings</h3>
               
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', background: 'var(--bg-primary)', borderRadius: '12px', marginBottom: '1rem' }}>
-                <div>
-                  <h4 style={{ fontWeight: '500', marginBottom: '0.25rem' }}>Show Last Seen</h4>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Let others see exactly when you were last online.</p>
-                </div>
-                <div onClick={() => handleTogglePreference('showLastSeen')} style={{ width: '44px', height: '24px', background: preferences.showLastSeen ? 'var(--accent-primary)' : 'var(--bg-tertiary)', borderRadius: '12px', position: 'relative', cursor: 'pointer', transition: 'var(--transition)' }}>
-                  <div style={{ width: '20px', height: '20px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', left: preferences.showLastSeen ? '22px' : '2px', transition: 'var(--transition)' }} />
-                </div>
+              <div style={{ marginBottom: '2rem' }}>
+                <PrivacyOption 
+                  label="Last Seen" 
+                  description="Who can see your last seen time and if you're online." 
+                  value={preferences.lastSeen} 
+                  onSelect={(v) => handlePrivacyChange('lastSeen', v)}
+                />
+                <PrivacyOption 
+                  label="Profile Photo" 
+                  description="Who can see your profile picture." 
+                  value={preferences.profilePhoto} 
+                  onSelect={(v) => handlePrivacyChange('profilePhoto', v)}
+                />
+                <PrivacyOption 
+                  label="About" 
+                  description="Who can see your status info." 
+                  value={preferences.about} 
+                  onSelect={(v) => handlePrivacyChange('about', v)}
+                />
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', background: 'var(--bg-primary)', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', background: 'var(--bg-primary)', borderRadius: '12px', marginBottom: '2rem' }}>
                 <div>
                   <h4 style={{ fontWeight: '500', marginBottom: '0.25rem' }}>Read Receipts</h4>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Let others know when you have read their messages.</p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>If you turn off read receipts, you won't be able to see read receipts from other people.</p>
                 </div>
                 <div onClick={() => handleTogglePreference('readReceipts')} style={{ width: '44px', height: '24px', background: preferences.readReceipts ? 'var(--accent-primary)' : 'var(--bg-tertiary)', borderRadius: '12px', position: 'relative', cursor: 'pointer', transition: 'var(--transition)' }}>
                   <div style={{ width: '20px', height: '20px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', left: preferences.readReceipts ? '22px' : '2px', transition: 'var(--transition)' }} />
                 </div>
+              </div>
+
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Blocked</h4>
+              <div style={{ padding: '1.5rem', background: 'var(--bg-primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  {user.blockedContacts?.length || 0} contacts blocked
+                </span>
+                <span style={{ color: 'var(--accent-primary)', fontWeight: '500' }}>View Blocked</span>
               </div>
             </div>
           )}

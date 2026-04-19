@@ -3,9 +3,10 @@ import io from 'socket.io-client';
 import axios from '../utils/axiosConfig';
 import useAuthStore from '../store/authStore';
 import useChatStore from '../store/chatStore';
-import { Send, Check, ArrowLeft, Star, Info, MoreVertical, Edit2, Trash2, X } from 'lucide-react';
+import { Send, Check, ArrowLeft, Star, Info, MoreVertical, Edit2, Trash2, X, Lock } from 'lucide-react';
 import GroupSettingsModal from './GroupSettingsModal';
 import { format } from 'date-fns';
+import { encryptMessage, decryptMessage } from '../utils/cryptoUtils';
 
 const ENDPOINT = import.meta.env.VITE_API_URL || 'http://localhost:5009';
 var socket, selectedChatCompare;
@@ -48,7 +49,12 @@ const ChatWindow = () => {
       try {
         setLoading(true);
         const { data } = await axios.get(`/api/messages/${selectedChat._id}`);
-        setMessages(data);
+        // Decrypt messages
+        const decryptedMessages = data.map(msg => ({
+          ...msg,
+          content: decryptMessage(msg.content, selectedChat._id)
+        }));
+        setMessages(decryptedMessages);
         setLoading(false);
         socket.emit('join chat', selectedChat._id);
         
@@ -73,13 +79,22 @@ const ChatWindow = () => {
       if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
         // Notification logic
       } else {
-        addMessage(newMessageRecieved);
+        // Decrypt received message
+        const decryptedMsg = {
+          ...newMessageRecieved,
+          content: decryptMessage(newMessageRecieved.content, newMessageRecieved.chat._id)
+        };
+        addMessage(decryptedMsg);
       }
     });
 
     socket.on('message updated', (updatedMessage) => {
       if (selectedChatCompare && selectedChatCompare._id === updatedMessage.chat._id) {
-        setMessages(messages.map(m => m._id === updatedMessage._id ? updatedMessage : m));
+        const decryptedMsg = {
+          ...updatedMessage,
+          content: decryptMessage(updatedMessage.content, updatedMessage.chat._id)
+        };
+        setMessages(messages.map(m => m._id === updatedMessage._id ? decryptedMsg : m));
       }
     });
     
@@ -93,14 +108,15 @@ const ChatWindow = () => {
     if (e.key === 'Enter' && newMessage) {
       socket.emit('stop typing', selectedChat._id);
       try {
-        const content = newMessage;
+        const encryptedContent = encryptMessage(newMessage, selectedChat._id);
+        const displayContent = newMessage;
         setNewMessage('');
         const { data } = await axios.post('/api/messages', {
-          content,
+          content: encryptedContent,
           chatId: selectedChat._id,
         });
         socket.emit('new message', data);
-        addMessage(data);
+        addMessage({ ...data, content: displayContent });
       } catch (error) {
         console.error('Failed to send message');
       }
@@ -115,14 +131,15 @@ const ChatWindow = () => {
     if (newMessage) {
       socket.emit('stop typing', selectedChat._id);
       try {
-        const content = newMessage;
+        const encryptedContent = encryptMessage(newMessage, selectedChat._id);
+        const displayContent = newMessage;
         setNewMessage('');
         const { data } = await axios.post('/api/messages', {
-          content,
+          content: encryptedContent,
           chatId: selectedChat._id,
         });
         socket.emit('new message', data);
-        addMessage(data);
+        addMessage({ ...data, content: displayContent });
       } catch (error) {
         console.error('Failed to send message');
       }
@@ -132,12 +149,13 @@ const ChatWindow = () => {
   const handleEditMessage = async () => {
     if (!editContent || !editingMessage) return;
     try {
+      const encryptedContent = encryptMessage(editContent, selectedChat._id);
       const { data } = await axios.put('/api/messages/edit', {
         messageId: editingMessage._id,
-        content: editContent
+        content: encryptedContent
       });
-      // Update message in store
-      const updatedMessages = messages.map(m => m._id === data._id ? data : m);
+      // Update message in store with raw content for display
+      const updatedMessages = messages.map(m => m._id === data._id ? { ...data, content: editContent } : m);
       setMessages(updatedMessages);
       setEditingMessage(null);
       setEditContent('');
@@ -222,7 +240,13 @@ const ChatWindow = () => {
           </button>
           <img src={sender.avatar} alt={sender.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
           <div>
-            <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>{sender.name}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>{sender.name}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                <Lock size={10} color="var(--success)" />
+                <span style={{ fontSize: '0.65rem', color: 'var(--success)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>E2EE</span>
+              </div>
+            </div>
             {isTyping ? (
               <div style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontStyle: 'italic' }}>typing...</div>
             ) : sender.isGroup ? (
