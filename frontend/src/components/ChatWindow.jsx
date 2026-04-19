@@ -187,7 +187,9 @@ const ChatWindow = () => {
     if (!chat) return {};
     if (chat.isGroupChat) return { 
       name: chat.chatName, 
-      avatar: chat.groupIcon || `https://ui-avatars.com/api/?name=${chat.chatName}&background=random`, 
+      avatar: chat.groupIcon && chat.groupIcon !== "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+        ? chat.groupIcon
+        : `https://ui-avatars.com/api/?name=${chat.chatName}&background=random`, 
       isGroup: true, 
       users: chat.users 
     };

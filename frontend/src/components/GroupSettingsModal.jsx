@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, UserPlus, LogOut, Edit3, Check, Trash2, Camera } from 'lucide-react';
 import axios from '../utils/axiosConfig';
 import useChatStore from '../store/chatStore';
@@ -10,11 +10,18 @@ const GroupSettingsModal = ({ isOpen, onClose }) => {
   const fileInputRef = useRef(null);
   
   const [isEditingName, setIsEditingName] = useState(false);
-  const [groupName, setGroupName] = useState(selectedChat?.chatName || '');
+  const [groupName, setGroupName] = useState('');
   const [memberSearch, setMemberSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [iconPreview, setIconPreview] = useState(selectedChat?.groupIcon);
+  const [iconPreview, setIconPreview] = useState('');
+
+  useEffect(() => {
+    if (selectedChat) {
+      setGroupName(selectedChat.chatName || '');
+      setIconPreview(selectedChat.groupIcon || '');
+    }
+  }, [selectedChat, isOpen]);
 
   if (!isOpen || !selectedChat) return null;
 
@@ -148,7 +155,10 @@ const GroupSettingsModal = ({ isOpen, onClose }) => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2.5rem' }}>
             <div style={{ position: 'relative', width: '120px', height: '120px' }}>
               <img 
-                src={iconPreview || `https://ui-avatars.com/api/?name=${selectedChat.chatName}&background=random`} 
+                src={iconPreview && iconPreview !== "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg" 
+                  ? iconPreview 
+                  : `https://ui-avatars.com/api/?name=${selectedChat.chatName}&background=random`
+                } 
                 alt="Group Icon" 
                 style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '4px solid var(--bg-tertiary)', boxShadow: 'var(--shadow-md)' }} 
               />
