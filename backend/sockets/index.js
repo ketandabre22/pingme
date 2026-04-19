@@ -30,13 +30,14 @@ const setupSockets = (io) => {
     });
 
     socket.on('message delivered', async ({ messageId, userId, chatId }) => {
+      // Notify sender immediately for ultra-low latency
+      socket.in(chatId).emit('status updated', { messageId, userId, status: 'delivered', chatId });
+      
       try {
-        const message = await Message.findById(messageId).populate('sender', '_id');
+        const message = await Message.findById(messageId);
         if (message && !message.deliveredTo.includes(userId)) {
           message.deliveredTo.push(userId);
           await message.save();
-          // Notify sender
-          socket.in(message.sender._id.toString()).emit('status updated', { messageId, userId, status: 'delivered', chatId });
         }
       } catch (error) {
         console.error('Error updating delivered status:', error);
@@ -44,17 +45,33 @@ const setupSockets = (io) => {
     });
 
     socket.on('message seen', async ({ messageId, userId, chatId }) => {
+      // Notify immediately for ultra-low latency
+      socket.in(chatId).emit('status updated', { messageId, userId, status: 'seen', chatId });
+
       try {
-        const message = await Message.findById(messageId).populate('sender', '_id');
+        const message = await Message.findById(messageId);
         if (message && !message.seenBy.includes(userId)) {
           message.seenBy.push(userId);
           if (!message.deliveredTo.includes(userId)) message.deliveredTo.push(userId);
           await message.save();
-          // Notify sender
-          socket.in(message.sender._id.toString()).emit('status updated', { messageId, userId, status: 'seen', chatId });
         }
       } catch (error) {
         console.error('Error updating seen status:', error);
+      }
+    });
+
+    socket.on('chat seen', async ({ chatId, userId }) => {
+      // Broadcast to everyone in the chat room that this user has seen everything
+      socket.in(chatId).emit('chat marked seen', { chatId, userId });
+
+      try {
+        // Bulk update in database
+        await Message.updateMany(
+          { chat: chatId, sender: { $ne: userId }, seenBy: { $ne: userId } },
+          { $addToSet: { seenBy: userId, deliveredTo: userId } }
+        );
+      } catch (error) {
+        console.error('Error bulk updating seen status:', error);
       }
     });
 

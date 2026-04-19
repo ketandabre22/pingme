@@ -59,15 +59,11 @@ const ChatWindow = () => {
         setLoading(false);
         socket.emit('join chat', selectedChat._id);
         
-        // Mark messages as seen in DB
-        await axios.put(`/api/messages/seen/${selectedChat._id}`);
+        // Mark all as seen immediately via socket for ultra-low latency
+        socket.emit('chat seen', { chatId: selectedChat._id, userId: user._id });
         
-        // Notify via socket for each unread message
-        decryptedMessages.forEach(msg => {
-          if (msg.sender._id !== user._id && !msg.seenBy.includes(user._id)) {
-            socket.emit('message seen', { messageId: msg._id, userId: user._id, chatId: selectedChat._id });
-          }
-        });
+        // Sync with DB in background
+        axios.put(`/api/messages/seen/${selectedChat._id}`).catch(err => console.error(err));
       } catch (error) {
         console.error('Failed to load messages');
         setLoading(false);
@@ -107,16 +103,27 @@ const ChatWindow = () => {
       setMessages(prev => prev.map(m => {
         if (m._id === messageId) {
           const updatedMsg = { ...m };
-          if (status === 'seen' && !updatedMsg.seenBy.includes(userId)) {
-            updatedMsg.seenBy = [...updatedMsg.seenBy, userId];
+          if (status === 'seen' && (!updatedMsg.seenBy || !updatedMsg.seenBy.includes(userId))) {
+            updatedMsg.seenBy = [...(updatedMsg.seenBy || []), userId];
           }
-          if (status === 'delivered' && !updatedMsg.deliveredTo.includes(userId)) {
-            updatedMsg.deliveredTo = [...updatedMsg.deliveredTo, userId];
+          if (status === 'delivered' && (!updatedMsg.deliveredTo || !updatedMsg.deliveredTo.includes(userId))) {
+            updatedMsg.deliveredTo = [...(updatedMsg.deliveredTo || []), userId];
           }
           return updatedMsg;
         }
         return m;
       }));
+    });
+
+    socket.on('chat marked seen', ({ chatId, userId }) => {
+      if (selectedChatCompare && selectedChatCompare._id === chatId) {
+        setMessages(prev => prev.map(m => {
+          if (m.sender._id !== userId && (!m.seenBy || !m.seenBy.includes(userId))) {
+            return { ...m, seenBy: [...(m.seenBy || []), userId], deliveredTo: [...(m.deliveredTo || []), userId] };
+          }
+          return m;
+        }));
+      }
     });
 
     socket.on('message updated', (updatedMessage) => {
@@ -125,7 +132,7 @@ const ChatWindow = () => {
           ...updatedMessage,
           content: decryptMessage(updatedMessage.content, updatedMessage.chat._id)
         };
-        setMessages(messages.map(m => m._id === updatedMessage._id ? decryptedMsg : m));
+        setMessages(prev => prev.map(m => m._id === updatedMessage._id ? decryptedMsg : m));
       }
     });
     
