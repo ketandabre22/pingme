@@ -4,15 +4,16 @@ import useChatStore from '../store/chatStore';
 import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
 import Settings from '../components/Settings';
+import CreateGroupModal from '../components/CreateGroupModal';
+import GroupSettingsModal from '../components/GroupSettingsModal';
 import logo from '../assets/logo_pm.svg';
 import io from 'socket.io-client';
-import CreateGroupModal from '../components/CreateGroupModal';
 
 const ENDPOINT = import.meta.env.VITE_API_URL || 'http://localhost:5009';
 
 const ChatPage = () => {
   const { user } = useAuthStore();
-  const { selectedChat, showSettings, socket, setSocket } = useChatStore();
+  const { selectedChat, showSettings, socket, setSocket, showGroupSettings, setShowGroupSettings } = useChatStore();
 
   useEffect(() => {
     const newSocket = io(ENDPOINT);
@@ -57,6 +58,10 @@ const ChatPage = () => {
         )}
       </div>
       <CreateGroupModal />
+      <GroupSettingsModal 
+        isOpen={showGroupSettings} 
+        onClose={() => setShowGroupSettings(false)} 
+      />
     </div>
   );
 };

@@ -13,7 +13,15 @@ var socket, selectedChatCompare;
 
 const ChatWindow = () => {
   const { user, updateSettings } = useAuthStore();
-  const { selectedChat, setSelectedChat, messages, setMessages, addMessage, socket } = useChatStore();
+  const { 
+    selectedChat, 
+    setSelectedChat, 
+    messages, 
+    setMessages, 
+    addMessage, 
+    socket,
+    setShowGroupSettings
+  } = useChatStore();
   
   const [newMessage, setNewMessage] = useState('');
   const [socketConnected, setSocketConnected] = useState(false);
@@ -23,7 +31,6 @@ const ChatWindow = () => {
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
   const [showMsgOptions, setShowMsgOptions] = useState(null);
-  const [showGroupSettings, setShowGroupSettings] = useState(false);
   
   const messagesEndRef = useRef(null);
 
@@ -320,11 +327,6 @@ const ChatWindow = () => {
             </button>
           )}
         </div>
-
-        <GroupSettingsModal 
-          isOpen={showGroupSettings} 
-          onClose={() => setShowGroupSettings(false)} 
-        />
       </div>
 
       {/* Messages */}

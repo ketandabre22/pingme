@@ -17,6 +17,9 @@ const useChatStore = create((set) => ({
   showGroupModal: false,
   setShowGroupModal: (val) => set({ showGroupModal: val }),
   
+  showGroupSettings: false,
+  setShowGroupSettings: (val) => set({ showGroupSettings: val }),
+  
   setSelectedChat: (chat) => set({ selectedChat: chat, showSettings: false }),
   
   setChats: (chats) => set({ chats }),
