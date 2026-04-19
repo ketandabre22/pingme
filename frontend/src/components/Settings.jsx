@@ -168,6 +168,47 @@ const Settings = () => {
             </div>
           )}
 
+          {activeTab === 'appearance' && (
+            <div className="animate-fade-in">
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--text-primary)' }}>Appearance</h3>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Choose your favorite theme and customize your experience.</p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1.5rem' }}>
+                {[
+                  { id: 'default', name: 'PingMe Blue', color: '#3b82f6', class: '' },
+                  { id: 'emerald', name: 'Emerald Green', color: '#10b981', class: 'theme-emerald' },
+                  { id: 'ocean', name: 'Ocean Teal', color: '#06b6d4', class: 'theme-ocean' },
+                  { id: 'sunset', name: 'Sunset Rose', color: '#f43f5e', class: 'theme-sunset' },
+                  { id: 'midnight', name: 'Midnight Purple', color: '#8b5cf6', class: 'theme-midnight' },
+                  { id: 'royal', name: 'Royal Amber', color: '#f59e0b', class: 'theme-royal' }
+                ].map((theme) => (
+                  <div 
+                    key={theme.id}
+                    onClick={() => {
+                      document.body.className = theme.class;
+                      localStorage.setItem('pingme-theme', theme.class);
+                      setMessage({ type: 'success', text: `Theme changed to ${theme.name}` });
+                    }}
+                    style={{ 
+                      background: 'var(--bg-secondary)', 
+                      borderRadius: '16px', 
+                      padding: '1rem', 
+                      cursor: 'pointer',
+                      border: document.body.className === theme.class ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                      textAlign: 'center',
+                      transition: 'var(--transition)'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                    onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  >
+                    <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: theme.color, margin: '0 auto 1rem', boxShadow: `0 4px 12px ${theme.color}44` }} />
+                    <div style={{ fontWeight: '500', fontSize: '0.9rem' }}>{theme.name}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {activeTab === 'favorites' && (
             <div className="animate-fade-in">
               <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--text-primary)' }}>Favorite Contacts</h3>

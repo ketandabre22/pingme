@@ -32,6 +32,35 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Theme Variations */
+body.theme-emerald {
+  --accent-primary: #10b981;
+  --accent-hover: #059669;
+}
+
+body.theme-ocean {
+  --accent-primary: #06b6d4;
+  --accent-hover: #0891b2;
+}
+
+body.theme-sunset {
+  --accent-primary: #f43f5e;
+  --accent-hover: #e11d48;
+}
+
+body.theme-midnight {
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --bg-tertiary: #1e293b;
+  --accent-primary: #8b5cf6;
+  --accent-hover: #7c3aed;
+}
+
+body.theme-royal {
+  --accent-primary: #f59e0b;
+  --accent-hover: #d97706;
+}
+
 * {
   margin: 0;
   padding: 0;

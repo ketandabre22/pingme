@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, LogOut, Settings as SettingsIcon, Users, X, Check, MessageSquare, ArrowLeft, User, Star, Shield, Bell, HelpCircle } from 'lucide-react';
+import { Search, LogOut, Settings as SettingsIcon, Users, X, Check, MessageSquare, ArrowLeft, User, Star, Shield, Bell, HelpCircle, Palette } from 'lucide-react';
 import axios from '../utils/axiosConfig';
 import useAuthStore from '../store/authStore';
 import useChatStore from '../store/chatStore';
@@ -165,6 +165,7 @@ const Sidebar = () => {
           <div style={{ padding: '0.5rem 0' }}>
             {[
               { id: 'account', icon: User, label: 'Account' },
+              { id: 'appearance', icon: Palette, label: 'Appearance' },
               { id: 'favorites', icon: Star, label: 'Favorites' },
               { id: 'privacy', icon: Shield, label: 'Privacy' },
               { id: 'notifications', icon: Bell, label: 'Notifications' },
